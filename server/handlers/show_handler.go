@@ -2,33 +2,39 @@ package handlers
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/krapie/showbox/server/database"
+	"github.com/krapie/showbox/server/models"
 )
 
-type APIHandler struct {
-	ctx context.Context
-	db  *database.DB
-}
-
-func New(ctx context.Context) (*APIHandler, error) {
-	db, err := database.New()
+func (h *Handler) GetShow(c *gin.Context) {
+	id, err := primitive.ObjectIDFromHex(c.Param("id"))
 	if err != nil {
-		return nil, err
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	return &APIHandler{
-		ctx: ctx,
-		db:  db,
-	}, nil
+	show, err := h.showSrv.GetShow(context.Background(), id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, show)
 }
 
-func (h *APIHandler) GetShow(c *gin.Context) {
+func (h *Handler) RegisterShow(c *gin.Context) {
+	var show models.Show
+	if err := c.ShouldBindJSON(&show); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-}
+	if err := h.showSrv.RegisterShow(context.Background(), &show); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-func (h *APIHandler) RegisterShow(c *gin.Context) {
-
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
