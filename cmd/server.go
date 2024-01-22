@@ -5,9 +5,9 @@ Copyright © 2024 Kevin Park <krapi0314@gmail.com>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+
+	"github.com/krapie/showbox/server"
 )
 
 // serverCmd represents the server command
@@ -16,7 +16,10 @@ var serverCmd = &cobra.Command{
 	Short: "Runs showbox API server for show ticketing.",
 	Long:  `Runs showbox API server for show ticketing.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("server called")
+		err := server.Run()
+		if err != nil {
+			panic(err)
+		}
 	},
 }
 
